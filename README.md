@@ -19,7 +19,7 @@ This is a custom web scraper designed to extract various data from the Universit
    pip install -r requirements.txt
    ```
 
-The project uses libraries such as BeautifulSoup4 for HTML parsing, requests for HTTP requests, and joblib for parallel processing.
+The project uses libraries such as BeautifulSoup4 for HTML parsing, requests for HTTP requests, joblib for parallel processing, and Selenium for browser automation to handle dynamic web content.
 
 ## Usage
 
@@ -185,3 +185,11 @@ Example of a single entry:
 - Data extraction depends on the structure of the university's web pages, which may change over time.
 - Respect the terms of service of the UniTS portal and avoid overloading their servers.
 - The current date in the examples reflects the scraping date (March 14, 2026).
+
+## Technologies Used
+
+- **Python**: The primary programming language used for all scripts.
+- **Selenium**: Used for browser automation to scrape dynamic web content that requires JavaScript rendering.
+- **BeautifulSoup4**: Employed for parsing and navigating HTML documents.
+- **Requests**: Utilized for making HTTP requests to fetch web pages.
+- **Joblib**: Applied for parallel processing to speed up data extraction tasks.
