@@ -43,7 +43,7 @@ rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 printf "\n\n\nADDRESS BOOK SCRAPER\n"
-python3 fetch_address_book.py --output="$OUTPUT_DIR/address_book.json" --limit 1
+python3 fetch_address_book.py --output="$OUTPUT_DIR/address_book.json"
 # python fetch_address_book.py --output="scraper_results_schedules_book_rooms_cources/address_book.json" --limit 1
 
 printf "\n\n\nTeams codes scraper\n"
@@ -51,15 +51,15 @@ python3 fetch_courses_with_teams_code.py -o "$OUTPUT_DIR/courses_with_teams_code
 # python fetch_courses_with_teams_code.py -o "scraper_results_schedules_book_rooms_cources/courses_with_teams_code.json"
 
 printf "\n\n\nRooms info scraper\n"
-python3 fetch_info_rooms.py -o "$OUTPUT_DIR/info_rooms.json" --limit 1
+python3 fetch_info_rooms.py -o "$OUTPUT_DIR/info_rooms.json"
 # python fetch_info_rooms.py -o "scraper_results_schedules_book_rooms_cources/info_rooms.json" --limit 1
 
 printf "\n\n\nROOMS CALENDAR\n"
-python3 fetch_rooms_calendar.py --start_date "$START_DATE" --end_date "$END_DATE" --output="$OUTPUT_DIR/rooms_calendar" --num_sites 1
+python3 fetch_rooms_calendar.py --start_date "$START_DATE" --end_date "$END_DATE" --output="$OUTPUT_DIR/rooms_calendar"
 # python fetch_rooms_calendar.py --start_date "2026-02-02" --end_date "2026-02-10" --output="scraper_results_schedules_book_rooms_cources/rooms_calendar" --num_sites 1
 
 printf "\n\n\nLESSONS CALENDAR SCARPER\n"
-python3 fetch_lessons_calendar.py --start_date "$START_DATE" --end_date "$END_DATE" --output="$OUTPUT_DIR/lessons_calendar" --num_departments 1
+python3 fetch_lessons_calendar.py --start_date "$START_DATE" --end_date "$END_DATE" --output="$OUTPUT_DIR/lessons_calendar"
 # python fetch_lessons_calendar.py --start_date "2026-03-02" --end_date "2026-03-10" --output="scraper_results_schedules_book_rooms_cources/lessons_calendar" --num_departments 1
 
 printf "\n\n\nSCRAPING ENDED\n"
