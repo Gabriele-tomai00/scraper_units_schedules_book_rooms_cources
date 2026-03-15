@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import re
 import time
 from pathlib import Path
+import shutil
 
 def init_output(output_file):
     output_file = Path(output_file)  # safe if already a Path or a string
