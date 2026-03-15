@@ -61,6 +61,7 @@ def _convert_raw_events(raw_events):
         room_name = event.get("NomeAula")
         last_update = event.get("ultimo_aggiornamento", "")
         cancelled = "no" if event.get("Annullato", "0") == "0" else "yes"
+        event_type = event.get("tipo") or event.get("type", "")
 
         # Clean the course name from any embedded HTML
         raw_course = event.get("name", "")
@@ -87,6 +88,8 @@ def _convert_raw_events(raw_events):
             "end_time":     safe(time_end),
             "name_event":   safe(course),
             "professors":   safe(teacher),
+            "cancelled":    cancelled,
+            "event_type":   safe(event_type),
         }
 
         if cancelled == "yes":
@@ -161,7 +164,8 @@ def response_filter(data):
     event_keys = [
         "room", "NomeAula", "CodiceAula",
         "NomeSede", "CodiceSede", "name",
-        "utenti", "orario", "Giorno", "Annullato"
+        "utenti", "orario", "Giorno", 
+        "Annullato", "tipo", "type"
     ]
     events = data.get("events", [])
     if not isinstance(events, list):
