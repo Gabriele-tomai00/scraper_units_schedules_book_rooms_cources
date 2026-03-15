@@ -1,3 +1,6 @@
+# exemple
+# python fetch_rooms_calendar.py --start_date "2026-03-18" --end_date "2026-03-19" --output="scraper_results_schedules_book_rooms_cources/rooms_calendar_19"
+
 from joblib import Parallel, delayed
 import shutil
 import os
