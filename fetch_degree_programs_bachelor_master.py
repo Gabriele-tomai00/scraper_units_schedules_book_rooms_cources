@@ -10,6 +10,9 @@ Dependencies: requests, beautifulsoup4
 Install with: pip install requests beautifulsoup4
 """
 
+# Sources:
+# https://portale.units.it/en/study/degree-courses
+
 import json
 import time
 import requests
