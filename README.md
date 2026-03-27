@@ -179,12 +179,30 @@ Example of a single entry:
 }
 ```
 
+### Degree programs
+![Degree programs](./img_readme/degree_programs.png)
+
+Example of a single entry:
+```json
+    {
+        "name": "CHIMICA",
+        "link": "https://lauree.units.it/2-chimica",
+        "category": "Laurea Magistrale",
+        "department": "Dipartimento di Scienze Chimiche e Farmaceutiche",
+        "type": "Corso di Laurea Magistrale",
+        "duration": "2 anni",
+        "location": "Sede di Trieste",
+        "language": "Inglese Italiano"
+    },
+```
+
 ## Notes
 
 - This scraper is specifically designed for the University of Trieste's systems and does not work with other institutions.
 - Data extraction depends on the structure of the university's web pages, which may change over time.
 - Respect the terms of service of the UniTS portal and avoid overloading their servers.
 - The current date in the examples reflects the scraping date (March 14, 2026).
+
 
 ## Technologies Used
 
