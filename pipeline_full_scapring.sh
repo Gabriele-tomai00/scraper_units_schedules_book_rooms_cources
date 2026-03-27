@@ -51,8 +51,8 @@ python3 fetch_courses_with_teams_code.py -o "$OUTPUT_DIR/courses_with_teams_code
 # python fetch_courses_with_teams_code.py -o "scraper_results_schedules_book_rooms_cources/courses_with_teams_code.json"
 
 printf "\n\n\bachelor, master and years masters' degree courses scraper\n"
-python3 fetch_degrees_programs_bachelor_master.py -o "$OUTPUT_DIR/full_courses.json"
-# python3 fetch_degrees_programs_bachelor_master.py -o "scraper_results_schedules_book_rooms_cources/full_degree_programs.json" --delay 0.15
+python3 fetch_degree_programs_bachelor_master.py -o "$OUTPUT_DIR/full_courses.json"
+# python3 fetch_degree_programs_bachelor_master.py -o "scraper_results_schedules_book_rooms_cources/full_degree_programs.json" --delay 0.15
 
 printf "\n\n\nRooms info scraper\n"
 python3 fetch_info_rooms.py -o "$OUTPUT_DIR/info_rooms.json"
