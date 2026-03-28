@@ -5,9 +5,6 @@ Scraper for all UniTS degree courses:
 
 Iterates over all paginated pages (?page=N) for each URL and saves
 all results into a single JSON file.
-
-Dependencies: requests, beautifulsoup4
-Install with: pip install requests beautifulsoup4
 """
 
 # Sources:
@@ -30,14 +27,14 @@ OUTPUT_FILE = Path("full_degree_programs.json")
 
 SOURCES = [
     {
-        "categoria": "Laurea Magistrale",
+        "category": "Master Degree",
         "url": (
             "https://portale.units.it/it/studiare/lauree-e-lauree-magistrali"
             "/corsi-di-laurea/lauree-magistrali"
         ),
     },
     {
-        "categoria": "Laurea Triennale / Ciclo Unico",
+        "category": "Bachelor’s Degree and 5/6 Years Masters' Degree",
         "url": (
             "https://portale.units.it/it/studiare/lauree-e-lauree-magistrali"
             "/corsi-di-laurea/lauree-triennali-e-ciclo-unico"
@@ -58,7 +55,7 @@ HEADERS = {
 # PARSING
 # ==============================================================================
 
-def parse_courses(soup: BeautifulSoup, categoria: str) -> list[dict]:
+def parse_courses(soup: BeautifulSoup, category: str) -> list[dict]:
     """
     Extract all course cards from a parsed page.
 
@@ -112,7 +109,6 @@ def parse_courses(soup: BeautifulSoup, categoria: str) -> list[dict]:
         courses.append({
             "name":         safe(nome),
             "link":         safe(link),
-            "category":     safe(categoria),
             "department":   safe(dipartimento),
             "type":         safe(tipo_normalized),
             "duration":     safe(durata),
@@ -181,11 +177,11 @@ def fetch_page(session: requests.Session, url: str, page: int) -> BeautifulSoup 
 def scrape_source(session: requests.Session, source: dict, delay) -> list[dict]:
     """Scrape all pages of a single source URL and return the course list."""
     url       = source["url"]
-    categoria = source["categoria"]
+    category = source["category"]
     all_courses: list[dict] = []
     page = 0
 
-    print(f"\n[SOURCE] {categoria}")
+    print(f"\n[SOURCE] {category}")
 
     while True:
         print(f"  [PAGE {page}]...", end=" ")
@@ -195,7 +191,7 @@ def scrape_source(session: requests.Session, source: dict, delay) -> list[dict]:
             print("fetch failed, stopping.")
             break
 
-        courses = parse_courses(soup, categoria)
+        courses = parse_courses(soup, category)
         print(f"{len(courses)} courses found.")
 
         if not courses:
@@ -247,18 +243,18 @@ if __name__ == "__main__":
             courses = scrape_source(session, source, args.delay)
             all_courses.extend(courses)
 
-    # Deduplicate by (name, category) — keys updated to match English field names
+    # Deduplicate by (name, type) — keys updated to match English field names
     seen: set[tuple] = set()
     unique_courses: list[dict] = []
     for c in all_courses:
-        key = (c["name"], c["category"])
+        key = (c["name"], c["type"])
         if key not in seen:
             seen.add(key)
             unique_courses.append(c)
 
     print(f"\n[DONE] Total unique courses scraped: {len(unique_courses)}")
 
-    save_data(unique_courses)
+    save_data(all_courses)
     print_summary(start_time, OUTPUT_FILE)
 
 
