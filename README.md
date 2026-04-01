@@ -94,7 +94,7 @@ Example of a single entry:
 ```
 
 ### Room Information
-![Room Information](./img_readme/cources_list.png)
+![Room Information](./img_readme/room_information.png)
 
 Example of a single entry:
 ```json
