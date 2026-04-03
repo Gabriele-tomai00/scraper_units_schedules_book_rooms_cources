@@ -54,6 +54,14 @@ printf "\n\n\bachelor, master and years masters' degree courses scraper\n"
 python3 fetch_degree_programs_bachelor_master.py -o "$OUTPUT_DIR/full_courses.json"
 # python3 fetch_degree_programs_bachelor_master.py -o "scraper_results_schedules_book_rooms_cources/full_degree_programs.json" --delay 0.15
 
+printf "\n\n\nCourses from catalogue\n"
+python3 fetch_courses_catalogue.py -o "$OUTPUT_DIR/courses_catalogue.json"
+# python fetch_courses_catalogue.py -o "scraper_results_schedules_book_rooms_cources/courses_catalogue.json"
+
+printf "\n\n\nSubjects from catalogue\n"
+python3 fetch_subjects.py "$OUTPUT_DIR/courses_catalogue.json" -o "$OUTPUT_DIR/subjects_catalogue.json"
+# python fetch_subjects.py -i "scraper_results_schedules_book_rooms_cources/courses_catalogue.json" -o "scraper_results_schedules_book_rooms_cources/subjects_catalogue.json" --limit 2 --delay 0.15
+
 printf "\n\n\nRooms info scraper\n"
 python3 fetch_info_rooms.py -o "$OUTPUT_DIR/info_rooms.json"
 # python fetch_info_rooms.py -o "scraper_results_schedules_book_rooms_cources/info_rooms.json" --limit 1
