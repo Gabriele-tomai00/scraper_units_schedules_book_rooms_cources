@@ -31,7 +31,6 @@ def process_data(data):
             ("course_code",         "AF_GEN_COD"),
             ("teams_code",          "JCD_O365"),
             ("degree_program",      "NOME_CORSO"),
-            ("degree_program_eng",  "NOME_CORSO_ENG"),
             ("degree_program_code", "CDS_COD"),
             ("academic_year",       "ANNO_ACCADEMICO"),
             ("teacher",             "DOCENTE"),

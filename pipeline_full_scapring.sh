@@ -50,17 +50,17 @@ printf "\n\n\nTeams codes scraper\n"
 python3 fetch_courses_with_teams_code.py -o "$OUTPUT_DIR/courses_with_teams_code.json"
 # python fetch_courses_with_teams_code.py -o "scraper_results_schedules_book_rooms_cources/courses_with_teams_code.json"
 
-printf "\n\n\bachelor, master and years masters' degree courses scraper\n"
-python3 fetch_degree_programs_bachelor_master.py -o "$OUTPUT_DIR/full_courses.json"
-# python3 fetch_degree_programs_bachelor_master.py -o "scraper_results_schedules_book_rooms_cources/full_degree_programs.json" --delay 0.15
+# printf "\n\n\bachelor, master and years masters' degree courses scraper\n"
+# python3 fetch_degree_programs_bachelor_master.py -o "$OUTPUT_DIR/full_courses.json"
+# # python3 fetch_degree_programs_bachelor_master.py -o "scraper_results_schedules_book_rooms_cources/degree_programs_old.json" --delay 0.15
 
-printf "\n\n\nCourses from catalogue\n"
-python3 fetch_courses_catalogue.py -o "$OUTPUT_DIR/courses_catalogue.json"
-# python fetch_courses_catalogue.py -o "scraper_results_schedules_book_rooms_cources/courses_catalogue.json"
+printf "\n\n\nCourses IDs from catalogue\n"
+python3 fetch_course_ids_catalogue.py -o "$OUTPUT_DIR/course_list_ids.json"
+# python fetch_course_ids_catalogue.py -o "scraper_results_schedules_book_rooms_cources/course_list_ids.json"
 
-printf "\n\n\nSubjects from catalogue\n"
-python3 fetch_subjects.py "$OUTPUT_DIR/courses_catalogue.json" -o "$OUTPUT_DIR/subjects_catalogue.json"
-# python fetch_subjects.py -i "scraper_results_schedules_book_rooms_cources/courses_catalogue.json" -o "scraper_results_schedules_book_rooms_cources/subjects_catalogue.json" --limit 2 --delay 0.15
+printf "\n\n\nDegrees and subjects from catalogue\n"
+python3 fetch_degrees_teachings.py.py -i "$OUTPUT_DIR/course_list_ids.json" --output-subjects "$OUTPUT_DIR/subjects.json" --output-degrees "$OUTPUT_DIR/degrees.json"
+# python fetch_degrees_teachings.py -i scraper_results_schedules_book_rooms_cources/course_list_ids.json --output-subjects scraper_results_schedules_book_rooms_cources/subjects.json --output-degrees scraper_results_schedules_book_rooms_cources/degrees.json --delay 0.15 --limit 5
 
 printf "\n\n\nRooms info scraper\n"
 python3 fetch_info_rooms.py -o "$OUTPUT_DIR/info_rooms.json"

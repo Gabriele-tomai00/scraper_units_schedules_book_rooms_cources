@@ -1,15 +1,19 @@
 """
 fetch_teachings.py
 ------------------
-Downloads the list of teachings (insegnamenti) for one or all courses
-from the UNITS course catalogue API and writes them all into a single JSON file.
+Downloads teachings (insegnamenti) and general degree info for one or all courses
+from the UNITS course catalogue API.
+
+Produces two output files:
+    - subjects.json : flat list of all teachings across all courses
+    - degrees.json  : flat list of general degree info for each course
 
 Usage:
     # Single course by ID:
-    python fetch_teachings.py --id 10775 -o output/subjects.json
+    python fetch_teachings.py --id 10775
 
-    # Batch mode (reads all courses from courses.json):
-    python fetch_teachings.py -o output/subjects.json --delay 0.15
+    # Batch mode (reads all courses from course_list_ids.json):
+    python fetch_teachings.py --delay 0.15 --limit 5
 """
 
 import sys
@@ -23,11 +27,11 @@ from pathlib import Path
 # Defaults
 # ---------------------------------------------------------------------------
 
-API_BASE_URL = "https://units.coursecatalogue.cineca.it/api/v1/corso/2025"
-INPUT_COURSES_FILE  = Path("scraper_results/course_list_ids.json")
+API_BASE_URL          = "https://units.coursecatalogue.cineca.it/api/v1/corso/2025"
+INPUT_COURSES_FILE    = Path("scraper_results/course_list_ids.json")
 OUTPUT_FILE_SUBJECTS  = Path("scraper_results/subjects.json")
-OUTPUT_FILE_DEGREE  = Path("scraper_results/degrees.json")
-DELAY_SEC    = 0.5
+OUTPUT_FILE_DEGREES   = Path("scraper_results/degrees.json")
+DELAY_SEC             = 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -48,7 +52,39 @@ def fetch_raw_course(course_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Filtering
+# Filtering — Degree info
+# ---------------------------------------------------------------------------
+
+def filter_degree(course: dict) -> dict:
+    """
+    Extract general degree-level info from the raw course response.
+
+    Fields intentionally excluded (uncomment to restore):
+        # "cod"          : course.get("cod"),
+        # "classe_cod"   : course.get("classe_cod"),
+        # "classe_it"    : course.get("classe_it"),
+        # "accesso_it"   : course.get("accesso_it"),
+        # "normativa_it" : course.get("normativa_it"),
+        # "ruoli"        : [
+        #     {"nome": f"{r.get('caricaNome','')} {r.get('caricaCognome','')}".strip(),
+        #      "ruolo": r.get("carica", "")}
+        #     for r in course.get("ruoli_it", [])
+        # ],
+    """
+    return {
+        "name"       : course.get("des_it"),
+        "url"        : course.get("sitoweb"),
+        "department" : course.get("dip_des_it"),
+        "duration"   : course.get("durata_it"),
+        "location"   : course.get("sede_des_it"),
+        "language"   : course.get("lingua_des_it"),
+        # they come from subgroup_des_it / classe_it in the course list.
+        # Uncomment below if you enrich this dict with data from courses.json:
+    }
+
+
+# ---------------------------------------------------------------------------
+# Filtering — Teachings
 # ---------------------------------------------------------------------------
 
 def filter_teaching(activity: dict, anno: int, corso_cod: str) -> dict:
@@ -64,15 +100,15 @@ def filter_teaching(activity: dict, anno: int, corso_cod: str) -> dict:
     docenti = [d.get("des", "") for d in activity.get("docenti", []) if d.get("des")]
 
     return {
-        "corso_cod"     : corso_cod,
-        "year"          : anno,
-        "cod"           : activity.get("cod"),
-        "adCod"         : activity.get("adCod"),
-        "name"          : activity.get("des_it"),
-        "CFU"           : activity.get("crediti"),
-        "type"          : activity.get("tipo_ins_des_it"),
-        "semester"      : activity.get("periodo_didattico_it"),
-        "professors"    : docenti,
+        "corso_cod"  : corso_cod,
+        "year"       : anno,
+        "cod"        : activity.get("cod"),
+        "adCod"      : activity.get("adCod"),
+        "name"       : activity.get("des_it"),
+        "CFU"        : activity.get("crediti"),
+        "type"       : activity.get("tipo_ins_des_it"),
+        "semester"   : activity.get("periodo_didattico_it"),
+        "professors" : docenti,
     }
 
 
@@ -98,35 +134,46 @@ def extract_teachings(course: dict) -> list[dict]:
 # Processing
 # ---------------------------------------------------------------------------
 
-def process_course(course_id: str) -> list[dict]:
+def process_course(course_id: str, category: str) -> tuple[dict, list[dict]]:
     """
-    Fetch and extract teachings for a single course ID.
-    Returns the list of filtered teachings (does NOT write to disk).
+    Fetch, extract degree info and teachings for a single course ID.
+    Returns (degree_dict, teachings_list) — does NOT write to disk.
     """
     print(f"  → Fetching course {course_id} ...", end=" ", flush=True)
     raw = fetch_raw_course(course_id)
+    degree = filter_degree(raw)
+    degree["category"] = category 
     teachings = extract_teachings(raw)
     print(f"OK — {len(teachings)} teachings")
-    return teachings
+    return degree, teachings
 
 
-def save_all(teachings: list[dict], output_path: Path) -> None:
-    """Write the full teachings list to a single JSON file."""
+# ---------------------------------------------------------------------------
+# Save
+# ---------------------------------------------------------------------------
+
+def save_json(data: list[dict], output_path: Path, label: str) -> None:
+    """Write a list of dicts to a JSON file, creating parent dirs as needed."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(teachings, f, ensure_ascii=False, indent=2)
-    print(f"\nSaved {len(teachings)} total teachings → '{output_path}'")
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"Saved {len(data)} {label} → '{output_path}'")
 
 
 # ---------------------------------------------------------------------------
 # Modes
 # ---------------------------------------------------------------------------
 
-def run_single(course_id: str, output_path: Path) -> None:
+def run_single(
+    course_id: str,
+    subjects_path: Path,
+    degrees_path: Path,
+) -> None:
     """Single-course mode."""
     try:
-        teachings = process_course(course_id)
-        save_all(teachings, output_path)
+        degree, teachings = process_course(course_id)
+        save_json([degree], degrees_path, "degrees")
+        save_json(teachings, subjects_path, "subjects")
     except requests.HTTPError as e:
         print(f"HTTP error: {e}")
         sys.exit(1)
@@ -138,8 +185,14 @@ def run_single(course_id: str, output_path: Path) -> None:
         sys.exit(1)
 
 
-def run_batch(input_path: Path, output_path: Path, delay: float, limit: int | None) -> None:
-    """Batch mode: read courses.json and accumulate all teachings into one file."""
+def run_batch(
+    input_path: Path,
+    subjects_path: Path,
+    degrees_path: Path,
+    delay: float,
+    limit: int | None,
+) -> None:
+    """Batch mode: read course list and accumulate degrees + teachings."""
     try:
         with open(input_path, "r", encoding="utf-8") as f:
             courses = json.load(f)
@@ -153,19 +206,24 @@ def run_batch(input_path: Path, output_path: Path, delay: float, limit: int | No
     total = len(courses)
     print(f"Batch mode: processing {total} courses from '{input_path}'")
 
+    all_degrees:   list[dict] = []
     all_teachings: list[dict] = []
 
     for idx, course in enumerate(courses, start=1):
         if limit is not None and idx > limit:
+            print(f"  Limit of {limit} courses reached, stopping.")
             break
+
         course_id = str(course.get("cod", "")).strip()
+        category = str(course.get("category", "")).strip()
         if not course_id:
             print(f"  [{idx}/{total}] Skipping entry with missing 'cod'")
             continue
 
         print(f"  [{idx}/{total}]", end=" ")
         try:
-            teachings = process_course(course_id)
+            degree, teachings = process_course(course_id, category)
+            all_degrees.append(degree)
             all_teachings.extend(teachings)
         except requests.HTTPError as e:
             print(f"HTTP error (skipping): {e}")
@@ -177,7 +235,9 @@ def run_batch(input_path: Path, output_path: Path, delay: float, limit: int | No
         if idx < total:
             time.sleep(delay)
 
-    save_all(all_teachings, output_path)
+    print()
+    save_json(all_degrees, degrees_path, "degrees")
+    save_json(all_teachings, subjects_path, "subjects")
 
 
 # ---------------------------------------------------------------------------
@@ -188,19 +248,25 @@ if __name__ == "__main__":
     start_time = time.time()
 
     parser = argparse.ArgumentParser(
-        description="Fetch teachings (insegnamenti) from the UNITS course catalogue API."
+        description="Fetch teachings and degree info from the UNITS course catalogue API."
     )
     parser.add_argument(
         "--input", "-i",
         type=str,
         default=str(INPUT_COURSES_FILE),
-        help=f"Input JSON file path (default: '{INPUT_COURSES_FILE}').",
+        help=f"Input JSON file with course list (default: '{INPUT_COURSES_FILE}').",
     )
     parser.add_argument(
-        "--output", "-o",
+        "--output-subjects",
         type=str,
-        default=str(OUTPUT_FILE),
-        help=f"Output JSON file path (default: '{OUTPUT_FILE}').",
+        default=str(OUTPUT_FILE_SUBJECTS),
+        help=f"Output JSON file for subjects (default: '{OUTPUT_FILE_SUBJECTS}').",
+    )
+    parser.add_argument(
+        "--output-degrees",
+        type=str,
+        default=str(OUTPUT_FILE_DEGREES),
+        help=f"Output JSON file for degree info (default: '{OUTPUT_FILE_DEGREES}').",
     )
     parser.add_argument(
         "--delay",
@@ -220,17 +286,18 @@ if __name__ == "__main__":
         type=int,
         default=None,
         metavar="N",
-        help="Stop after scraping N courses (useful for testing)",
+        help="Stop after scraping N courses (useful for testing).",
     )
 
     args = parser.parse_args()
-    output_path = Path(args.output)
-    input_path = Path(args.input)
+    subjects_path = Path(args.output_subjects)
+    degrees_path  = Path(args.output_degrees)
+    input_path    = Path(args.input)
 
     if args.course_id:
-        run_single(args.course_id, output_path)
+        run_single(args.course_id, subjects_path, degrees_path)
     else:
-        run_batch(input_path, output_path, args.delay, args.limit)
+        run_batch(input_path, subjects_path, degrees_path, args.delay, args.limit)
 
     elapsed = time.time() - start_time
     print(f"Elapsed: {elapsed:.1f}s")
