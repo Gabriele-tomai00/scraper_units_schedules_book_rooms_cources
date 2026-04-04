@@ -142,6 +142,7 @@ def process_course(course_id: str, category: str) -> tuple[dict, list[dict]]:
     print(f"  → Fetching course {course_id} ...", end=" ", flush=True)
     raw = fetch_raw_course(course_id)
     degree = filter_degree(raw)
+    degree["course_id"] = course_id 
     degree["category"] = category 
     teachings = extract_teachings(raw)
     print(f"OK — {len(teachings)} teachings")
